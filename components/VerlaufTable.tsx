@@ -5,9 +5,11 @@ import type { TidWithRelations } from "@/lib/db/queries";
 import { unparseCsv } from "@/lib/csv";
 import { downloadTextFile } from "@/lib/download";
 import { formatDateTime } from "@/lib/format";
+import { buildSaintExport } from "@/lib/saint";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -20,17 +22,28 @@ import { CopyButton } from "./CopyButton";
 
 export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
   const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (r) =>
-        String(r.tid).includes(q) ||
-        (r.note ?? "").toLowerCase().includes(q) ||
-        r.generatedUrl.toLowerCase().includes(q),
-    );
-  }, [rows, search]);
+    return rows.filter((r) => {
+      if (q) {
+        const matches =
+          String(r.tid).includes(q) ||
+          (r.note ?? "").toLowerCase().includes(q) ||
+          r.generatedUrl.toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      // createdAt is stored as "YYYY-MM-DD HH:MM:SS" (UTC); comparing the
+      // date portion lexicographically against the YYYY-MM-DD range inputs
+      // is sufficient for this internal tool's day-granularity filtering.
+      const datePart = r.createdAt.slice(0, 10);
+      if (fromDate && datePart < fromDate) return false;
+      if (toDate && datePart > toDate) return false;
+      return true;
+    });
+  }, [rows, search, fromDate, toDate]);
 
   function handleExport() {
     const csv = unparseCsv(
@@ -64,9 +77,18 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
     downloadTextFile("verlauf.csv", csv);
   }
 
+  function handleSaintExport() {
+    const tab = buildSaintExport(filtered);
+    downloadTextFile(
+      "saint-export.tab",
+      tab,
+      "text/tab-separated-values;charset=utf-8;",
+    );
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <Input
           type="text"
           className="max-w-sm"
@@ -74,9 +96,34 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Button type="button" variant="outline" onClick={handleExport}>
-          Export CSV
-        </Button>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="grid gap-1.5">
+            <Label htmlFor="verlauf-from">Von</Label>
+            <Input
+              id="verlauf-from"
+              type="date"
+              className="w-auto"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="verlauf-to">Bis</Label>
+            <Input
+              id="verlauf-to"
+              type="date"
+              className="w-auto"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+            />
+          </div>
+          <Button type="button" variant="outline" onClick={handleExport}>
+            Export CSV
+          </Button>
+          <Button type="button" variant="outline" onClick={handleSaintExport}>
+            Export SAINT (Adobe Analytics)
+          </Button>
+        </div>
       </div>
 
       <Card className="overflow-x-auto p-0">
