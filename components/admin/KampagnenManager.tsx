@@ -142,7 +142,7 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm">Kampagnen ({rows.length})</CardTitle>
           <Button type="button" variant="outline" onClick={handleExport}>
-            Export CSV
+            Als CSV exportieren
           </Button>
         </CardHeader>
         <CardContent>

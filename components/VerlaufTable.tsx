@@ -139,11 +139,11 @@ export function VerlaufTable({
             />
           </div>
           <Button type="button" variant="outline" onClick={handleExport}>
-            Export CSV
+            Als CSV exportieren
           </Button>
           {isAdmin && (
             <Button type="button" variant="outline" onClick={handleSaintExport}>
-              Export SAINT
+              Als SAINT exportieren
             </Button>
           )}
         </div>
@@ -154,10 +154,10 @@ export function VerlaufTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tracking ID</TableHead>
-                <TableHead>Kampagnen ID</TableHead>
-                <TableHead>Seiten ID</TableHead>
-                <TableHead>Medium ID</TableHead>
+                <TableHead>Tracking-ID</TableHead>
+                <TableHead>Kampagnen-ID</TableHead>
+                <TableHead>Site-ID</TableHead>
+                <TableHead>Medium-ID</TableHead>
                 <TableHead>Generierte URL</TableHead>
                 <TableHead>Erstellt</TableHead>
               </TableRow>
