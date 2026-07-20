@@ -157,8 +157,8 @@ export function GeneratorForm({
       </Card>
 
       {result && (
-        <Card className="border-primary/20 bg-accent/40">
-          <CardContent className="space-y-3">
+        <Card>
+          <CardContent className="pt-8 space-y-3">
             <p className="text-sm font-medium">
               Zugewiesene Tracking-ID:{" "}
               <span className="font-semibold">{result.tid}</span>
