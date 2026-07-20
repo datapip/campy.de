@@ -86,8 +86,8 @@ npm run lint       # ESLint
 
 ## Seiten
 
-- `/` — Generator: einzelne URL erzeugen oder CSV-Bulk-Upload
-- `/verlauf` — Verlauf aller generierten URLs, mit Suche und CSV-Export
+- `/` — Generator (einzelne URL erzeugen oder CSV-Bulk-Upload) und Verlauf
+  aller generierten URLs (Suche, CSV-Export) auf einer Seite
 - `/admin` — Verwaltung von Kampagnen, Sites und Medien (CRUD, CSV-Export,
   Warnhinweis bei nahender ID-Erschöpfung)
 

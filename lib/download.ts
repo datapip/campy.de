@@ -14,3 +14,13 @@ export function downloadTextFile(
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+/** Triggers a browser download of a data URL (e.g. a generated QR code PNG). Client-only. */
+export function downloadDataUrl(filename: string, dataUrl: string): void {
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}

@@ -36,9 +36,10 @@ export function GeneratorForm({
   const [baseUrl, setBaseUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ tid: number; generatedUrl: string } | null>(
-    null,
-  );
+  const [result, setResult] = useState<{
+    tid: number;
+    generatedUrl: string;
+  } | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,7 +73,7 @@ export function GeneratorForm({
   return (
     <div className="space-y-6">
       <Card>
-        <CardContent>
+        <CardContent className="pt-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">

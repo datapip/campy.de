@@ -70,7 +70,6 @@ export async function generateUrl(
   });
 
   revalidatePath("/");
-  revalidatePath("/verlauf");
   revalidatePath("/admin");
 
   return { ok: true, data: { tid, generatedUrl } };

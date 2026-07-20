@@ -23,7 +23,6 @@ import type { ActionResult } from "./types";
 function revalidateAdmin() {
   revalidatePath("/admin");
   revalidatePath("/");
-  revalidatePath("/verlauf");
 }
 
 // ---------- Kampagnen ----------

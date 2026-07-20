@@ -68,11 +68,11 @@ https://www.example.de/lp/page.html?tid=12948&campid=1203&siteid=104&meid=29
 - Not real authentication — just enough to keep this internal tool from being stumbled upon, per explicit product decision. There is no user database, hashing, or session expiry beyond the cookie itself.
 - Two shared passwords, defined in `lib/auth-config.ts` (`AUTH_PASSWORDS.user` / `AUTH_PASSWORDS.admin`) — change them there to rotate. Whichever password is entered on `/login` determines the role; there is no separate role selector.
 - `middleware.ts` redirects any request without a valid `zug_session` cookie to `/login`, and redirects `user`-role requests away from `/admin/*`. `app/actions/auth.ts` holds the `login`/`logout` server actions that set/clear the cookie.
-- Authenticated routes (`/`, `/verlauf`, `/admin/*`) live under the `app/(app)/` route group, whose layout reads the role cookie and passes it to `NavBar` (hides "Verwaltung" for non-admins). `/login` sits outside that group and has no nav chrome.
+- Authenticated routes (`/`, `/admin/*`) live under the `app/(app)/` route group, whose layout reads the role cookie and passes it to `NavBar` (hides "Verwaltung" for non-admins). `/login` sits outside that group and has no nav chrome.
 
 ## Structure
 
-- `app/(app)/` — authenticated routes: `/` (generator), `/verlauf` (history), `/admin` (Kampagnen | Sites | Medien | Klick-IDs)
+- `app/(app)/` — authenticated routes: `/` (generator + history on one page), `/admin` (Kampagnen | Sites | Medien | Klick-IDs)
 - `app/login/` — password prompt, outside the authenticated route group
 - `lib/db/` — Drizzle schema, migrations, seed
 - `lib/url-builder.ts` — pure URL construction + validation logic (keep framework-free and unit-testable)

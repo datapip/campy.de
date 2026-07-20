@@ -186,7 +186,6 @@ export async function bulkGenerate(
   );
 
   revalidatePath("/");
-  revalidatePath("/verlauf");
   revalidatePath("/admin");
 
   const results: BulkGenerateResultRow[] = rows.map((r, i) => ({

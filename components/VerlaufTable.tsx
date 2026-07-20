@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { TidWithRelations } from "@/lib/db/queries";
 import { unparseCsv } from "@/lib/csv";
 import { downloadTextFile } from "@/lib/download";
@@ -19,11 +19,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CopyButton } from "./CopyButton";
+import { QrCodeButton } from "./QrCodeButton";
+
+const PAGE_SIZE = 50;
 
 export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -44,6 +48,17 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
       return true;
     });
   }, [rows, search, fromDate, toDate]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, fromDate, toDate]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   function handleExport() {
     const csv = unparseCsv(
@@ -126,25 +141,26 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
         </div>
       </div>
 
-      <Card className="overflow-x-auto p-0">
-        <CardContent className="p-0">
+      <Card className="overflow-x-auto">
+        <CardContent className="p-4">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>tid</TableHead>
-                <TableHead>Notiz</TableHead>
-                <TableHead>Kampagne</TableHead>
-                <TableHead>Site</TableHead>
-                <TableHead>Medium</TableHead>
+                <TableHead>Tracking ID</TableHead>
+                <TableHead>Kampagnen ID</TableHead>
+                <TableHead>Seiten ID</TableHead>
+                <TableHead>Medium ID</TableHead>
                 <TableHead>Generierte URL</TableHead>
                 <TableHead>Erstellt</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((r) => (
+              {paginated.map((r) => (
                 <TableRow key={r.tid}>
-                  <TableCell>{r.tid}</TableCell>
-                  <TableCell>{r.note ?? ""}</TableCell>
+                  <TableCell>
+                    {r.tid}
+                    {r.note ? ` / ${r.note}` : ""}
+                  </TableCell>
                   <TableCell>
                     {r.campid} / {r.campaignName} - {r.campaignDate}
                   </TableCell>
@@ -160,6 +176,10 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
                         {r.generatedUrl}
                       </span>
                       <CopyButton text={r.generatedUrl} label="Kopieren" />
+                      <QrCodeButton
+                        url={r.generatedUrl}
+                        filename={`qr-tid-${r.tid}.png`}
+                      />
                     </div>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
@@ -170,7 +190,7 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
               {filtered.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={6}
                     className="py-6 text-center text-muted-foreground"
                   >
                     Keine Einträge gefunden.
@@ -181,6 +201,37 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
           </Table>
         </CardContent>
       </Card>
+
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          {filtered.length === 0
+            ? "0 Einträge"
+            : `${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, filtered.length)} von ${filtered.length} Einträgen`}
+        </p>
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={currentPage <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Zurück
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Seite {currentPage} von {totalPages}
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={currentPage >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Weiter
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

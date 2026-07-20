@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/", label: "Generator", adminOnly: false },
-  { href: "/verlauf", label: "Verlauf", adminOnly: false },
   { href: "/admin", label: "Verwaltung", adminOnly: true },
 ];
 
