@@ -17,6 +17,7 @@ npm run lint       # ESLint
 - SQLite at `./data/app.db`, accessed via Drizzle ORM with `better-sqlite3`
 - Tailwind CSS + [shadcn/ui](https://ui.shadcn.com/) for styling and components (Radix primitives, generated into `components/ui/`)
 - `papaparse` for all CSV parsing (never hand-rolled splitting)
+- `qrcode` for client-side QR code PNG generation (no server round-trip)
 
 ## Domain model & terminology
 
@@ -33,7 +34,7 @@ https://www.example.de/lp/page.html?tid=12948&campid=1203&siteid=104&meid=29
 | `siteid` | Site-ID (where campaign runs)     | sequential 3-digit | admin UI            |
 | `meid`   | Medium-ID (e.g. Text Ad, QR-Code) | sequential 2-digit | admin UI            |
 
-- Campaigns are displayed as `<campid> / <name> - <MM.YYYY>` (e.g. `1203 / PHV Sommer - 08.2026`); sites and mediums as `<id> / <name>`.
+- Campaigns are displayed as `<campid> / <name> - <MM.YYYY>` (e.g. `1203 / PHV Sommer - 08.2026`); sites and mediums as `<id> / <name>`. Tracking-IDs follow the same convention: `<tid>` alone, or `<tid> / <note>` when a note is set (e.g. `12952 / test`).
 - Tables: `tids`, `campaigns`, `sites`, `mediums`, plus a `settings` table (holds the tid start value).
 - **`vkclkid` (optional, per-site):** some ad platforms offer their own click-ID macro (e.g. Google Ads ValueTrack `{campaignid}_{adgroupid}_{creative}`, Facebook `{{ad.id}}`). Each site can have one template string, configured in the "Klick-IDs" admin tab and stored on `sites.vkclkid_template`. If set, it's appended as the URL's last query param (`&vkclkid=<template>`); if not set for the selected site, nothing is appended. The template is resolved purely from the chosen `siteid` — there's no per-generation input for it.
 
@@ -46,6 +47,12 @@ https://www.example.de/lp/page.html?tid=12948&campid=1203&siteid=104&meid=29
 5. **Referenced master data is undeletable.** Campaigns/sites/mediums with existing tid references cannot be deleted — return an explanatory error.
 6. **Bulk imports are all-or-nothing.** Validation preview first; if any row has an error, nothing is written.
 7. **`vkclkid` placeholders stay unencoded.** Platform macros use literal `{...}`/`{{...}}` braces that must survive percent-encoding untouched (see `encodeVkclkidTemplate` in `lib/url-builder.ts`) — the rest of the template is percent-encoded normally.
+
+## History (Verlauf)
+
+- The generator and the history table live on the same page (`/`, `app/(app)/page.tsx`) — generator on top, history below — not separate routes/tabs.
+- `components/VerlaufTable.tsx` paginates client-side at 50 rows per page, with search (tid, note, URL) and from/to date filters; changing a filter resets to page 1. CSV and SAINT exports always cover the full filtered result set, not just the current page.
+- Each row has a "QR-Code" button (`components/QrCodeButton.tsx`) that generates a 500×500 black/white PNG for that row's `generatedUrl` client-side via `qrcode` and downloads it as `qr-tid-<tid>.png`. `lib/download.ts`'s `downloadDataUrl` triggers the browser download from the generated data URL (sibling to `downloadTextFile`, which is for text/CSV content).
 
 ## Conventions
 
@@ -77,7 +84,9 @@ https://www.example.de/lp/page.html?tid=12948&campid=1203&siteid=104&meid=29
 - `lib/db/` — Drizzle schema, migrations, seed
 - `lib/url-builder.ts` — pure URL construction + validation logic (keep framework-free and unit-testable)
 - `lib/csv.ts` — CSV import/export helpers
+- `lib/download.ts` — client-only browser download helpers (`downloadTextFile` for CSV/text, `downloadDataUrl` for generated binary content like QR PNGs)
 - `lib/auth.ts` / `lib/auth-config.ts` — role/cookie helpers and the gate passwords
+- `components/VerlaufTable.tsx` — paginated history table (search, date filters, CSV/SAINT export, per-row QR code)
 - `components/ui/` — shadcn/ui primitives (generated; edit sparingly, prefer composing over modifying)
 
 ## Testing changes
