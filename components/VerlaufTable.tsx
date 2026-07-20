@@ -23,7 +23,13 @@ import { QrCodeButton } from "./QrCodeButton";
 
 const PAGE_SIZE = 50;
 
-export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
+export function VerlaufTable({
+  rows,
+  isAdmin,
+}: {
+  rows: TidWithRelations[];
+  isAdmin: boolean;
+}) {
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -135,9 +141,11 @@ export function VerlaufTable({ rows }: { rows: TidWithRelations[] }) {
           <Button type="button" variant="outline" onClick={handleExport}>
             Export CSV
           </Button>
-          <Button type="button" variant="outline" onClick={handleSaintExport}>
-            Export SAINT (Adobe Analytics)
-          </Button>
+          {isAdmin && (
+            <Button type="button" variant="outline" onClick={handleSaintExport}>
+              Export SAINT
+            </Button>
+          )}
         </div>
       </div>
 

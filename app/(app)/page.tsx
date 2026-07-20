@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { GeneratorTabs } from "@/components/GeneratorTabs";
 import { VerlaufTable } from "@/components/VerlaufTable";
 import {
@@ -6,14 +7,17 @@ import {
   getSites,
   getTidsWithRelations,
 } from "@/lib/db/queries";
+import { SESSION_COOKIE, isRole } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default function GeneratorPage() {
+export default async function GeneratorPage() {
   const campaigns = getCampaigns();
   const sites = getSites();
   const mediums = getMediums();
   const rows = getTidsWithRelations();
+  const roleCookie = (await cookies()).get(SESSION_COOKIE)?.value;
+  const isAdmin = isRole(roleCookie) && roleCookie === "admin";
 
   return (
     <div className="space-y-10">
@@ -34,7 +38,7 @@ export default function GeneratorPage() {
             Alle bisher generierten Tracking-URLs, neueste zuerst.
           </p>
         </div>
-        <VerlaufTable rows={rows} />
+        <VerlaufTable rows={rows} isAdmin={isAdmin} />
       </div>
     </div>
   );
