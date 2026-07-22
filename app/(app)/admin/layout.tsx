@@ -6,7 +6,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div>
         <h1 className="text-xl font-semibold">Verwaltung</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Stammdaten für Kampagnen, Sites, Medien und Klick-IDs pflegen.
+          Stammdaten für Kampagnen, Mandanten, Sites und Medien pflegen.
         </p>
       </div>
       <AdminNav />

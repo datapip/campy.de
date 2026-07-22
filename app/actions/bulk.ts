@@ -2,8 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { parseCsv } from "@/lib/csv";
-import { getCampaigns, getMediums, getSites } from "@/lib/db/queries";
+import {
+  getCampaigns,
+  getMediums,
+  getMediumSiteMap,
+  getSites,
+} from "@/lib/db/queries";
 import { insertTidsBulk } from "@/lib/db/ids";
+import { syncConfigSnapshot } from "@/lib/config-sync";
+import { isMediumAllowedForSite } from "@/lib/site-mediums";
 import { buildTrackingUrl, validateBaseUrl } from "@/lib/url-builder";
 import type { ActionResult } from "./types";
 
@@ -46,6 +53,7 @@ function validateRows(
   const campaignIds = new Set(getCampaigns().map((c) => c.campid));
   const siteIds = new Set(getSites().map((s) => s.siteid));
   const mediumIds = new Set(getMediums().map((m) => m.meid));
+  const mediumSiteMap = getMediumSiteMap();
 
   return rows.map((row, i): BulkPreviewRow => {
     const errors: string[] = [];
@@ -76,6 +84,15 @@ function validateRows(
       errors.push("Kein Medium angegeben (Spalte meid oder Vorauswahl).");
     } else if (meidField.value != null && !mediumIds.has(meidField.value)) {
       errors.push(`Medium ${meidField.value} existiert nicht.`);
+    } else if (
+      meidField.value != null &&
+      siteidField.value != null &&
+      siteIds.has(siteidField.value) &&
+      !isMediumAllowedForSite(meidField.value, siteidField.value, mediumSiteMap)
+    ) {
+      errors.push(
+        `Medium ${meidField.value} ist für Site ${siteidField.value} nicht zulässig.`,
+      );
     }
 
     const validated = validateBaseUrl(url);
@@ -185,6 +202,7 @@ export async function bulkGenerate(
     })),
   );
 
+  syncConfigSnapshot();
   revalidatePath("/");
   revalidatePath("/admin");
 

@@ -1,0 +1,83 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e16] [cursor=pointer]
+  - alert [ref=e20]: Ziel-URL Generator
+  - banner [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]: Ziel-URL Generator
+      - navigation [ref=e24]:
+        - link "Generator" [ref=e25] [cursor=pointer]:
+          - /url: /
+        - link "Verwaltung" [ref=e26] [cursor=pointer]:
+          - /url: /admin
+      - button "Abmelden" [ref=e28] [cursor=pointer]
+  - main [ref=e29]:
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - heading "Ziel-URL Generator" [level=1] [ref=e33]
+          - paragraph [ref=e34]: Erstellt Kampagnen-Tracking-URLs mit automatisch vergebener Tracking-ID.
+        - generic [ref=e35]:
+          - tablist [ref=e36]:
+            - tab "Einzeln generieren" [selected] [ref=e37] [cursor=pointer]
+            - tab "Bulk-Upload" [ref=e38] [cursor=pointer]
+          - tabpanel "Einzeln generieren" [ref=e39]:
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - generic [ref=e45]:
+                  - text: Kampagne
+                  - combobox "Kampagne" [ref=e46] [cursor=pointer]:
+                    - generic: 1281 / fbb - Kfz - 07/2026
+                  - combobox [ref=e49]
+                - generic [ref=e50]:
+                  - text: Site
+                  - combobox "Site" [ref=e51] [cursor=pointer]:
+                    - generic: 161 / vermarkter
+                  - combobox [ref=e54]
+                - generic [ref=e55]:
+                  - text: Medium
+                  - combobox "Medium" [ref=e56] [cursor=pointer]:
+                    - generic: 31 / video
+                  - combobox [ref=e59]
+              - generic [ref=e60]:
+                - text: Notiz zur Tracking-ID (optional)
+                - textbox "Notiz zur Tracking-ID (optional)" [ref=e61]:
+                  - /placeholder: z. B. Motiv spielende Kinder
+              - generic [ref=e62]:
+                - text: Ziel-URL
+                - textbox "Ziel-URL" [ref=e63]:
+                  - /placeholder: https://www.example.de/lp/seite.html
+              - button "URL generieren" [ref=e65] [cursor=pointer]
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - heading "Verlauf" [level=2] [ref=e68]
+          - paragraph [ref=e69]: Alle bisher generierten Tracking-URLs, neueste zuerst.
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - textbox "Suche nach tid, Notiz oder URL…" [ref=e72]
+            - generic [ref=e73]:
+              - generic [ref=e74]:
+                - generic [ref=e75]: Von
+                - textbox "Von" [ref=e76]
+              - generic [ref=e77]:
+                - generic [ref=e78]: Bis
+                - textbox "Bis" [ref=e79]
+              - button "Als CSV exportieren" [ref=e80] [cursor=pointer]
+              - button "Als SAINT exportieren" [ref=e81] [cursor=pointer]
+          - table [ref=e85]:
+            - rowgroup [ref=e86]:
+              - row [ref=e87]:
+                - columnheader "Tracking-ID" [ref=e88]
+                - columnheader "Kampagnen-ID" [ref=e89]
+                - columnheader "Site-ID" [ref=e90]
+                - columnheader "Medium-ID" [ref=e91]
+                - columnheader "Generierte URL" [ref=e92]
+                - columnheader "Erstellt" [ref=e93]
+            - rowgroup [ref=e94]:
+              - row [ref=e95]:
+                - cell "Keine Einträge gefunden." [ref=e96]
+          - generic [ref=e97]:
+            - paragraph [ref=e98]: 0 Einträge
+            - generic [ref=e99]:
+              - button "Zurück" [disabled]
+              - generic [ref=e100]: Seite 1 von 1
+              - button "Weiter" [disabled]

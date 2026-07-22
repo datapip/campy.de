@@ -1,0 +1,12 @@
+- generic [ref=f5e1]:
+  - button "Open Next.js Dev Tools" [ref=f5e154] [cursor=pointer]
+  - alert [ref=f5e158]: Anmelden — Ziel-URL Generator
+  - generic [ref=f5e160]:
+    - generic [ref=f5e161]:
+      - generic [ref=f5e162]: Ziel-URL Generator
+      - generic [ref=f5e163]: Bitte Passwort eingeben, um fortzufahren.
+    - generic [ref=f5e165]:
+      - generic [ref=f5e166]:
+        - text: Passwort
+        - textbox "Passwort" [active] [ref=f5e167]
+      - button "Anmelden" [disabled]

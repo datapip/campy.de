@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { deleteTid } from "@/app/actions/admin";
 import type { TidWithRelations } from "@/lib/db/queries";
 import { unparseCsv } from "@/lib/csv";
 import { downloadTextFile } from "@/lib/download";
-import { formatDateTime } from "@/lib/format";
+import { formatCampaign, formatDateTime } from "@/lib/format";
 import { buildSaintExport } from "@/lib/saint";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,10 +32,30 @@ export function VerlaufTable({
   rows: TidWithRelations[];
   isAdmin: boolean;
 }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [page, setPage] = useState(1);
+  const [busyTid, setBusyTid] = useState<number | null>(null);
+  const [rowError, setRowError] = useState<{ tid: number; message: string } | null>(
+    null,
+  );
+
+  async function handleDelete(tid: number) {
+    setBusyTid(tid);
+    setRowError(null);
+    try {
+      const res = await deleteTid(tid);
+      if (!res.ok) {
+        setRowError({ tid, message: res.error });
+        return;
+      }
+      router.refresh();
+    } finally {
+      setBusyTid(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -72,6 +94,7 @@ export function VerlaufTable({
         "tid",
         "note",
         "campid",
+        "campaignMandant",
         "campaignName",
         "siteid",
         "siteName",
@@ -85,6 +108,7 @@ export function VerlaufTable({
         r.tid,
         r.note,
         r.campid,
+        r.campaignMandantName ?? "",
         r.campaignName,
         r.siteid,
         r.siteName,
@@ -160,6 +184,7 @@ export function VerlaufTable({
                 <TableHead>Medium-ID</TableHead>
                 <TableHead>Generierte URL</TableHead>
                 <TableHead>Erstellt</TableHead>
+                {isAdmin && <TableHead></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -170,7 +195,12 @@ export function VerlaufTable({
                     {r.note ? ` / ${r.note}` : ""}
                   </TableCell>
                   <TableCell>
-                    {r.campid} / {r.campaignName} - {r.campaignDate}
+                    {formatCampaign({
+                      campid: r.campid,
+                      name: r.campaignName,
+                      date: r.campaignDate,
+                      mandantName: r.campaignMandantName,
+                    })}
                   </TableCell>
                   <TableCell>
                     {r.siteid} / {r.siteName}
@@ -193,12 +223,30 @@ export function VerlaufTable({
                   <TableCell className="whitespace-nowrap">
                     {formatDateTime(r.createdAt)}
                   </TableCell>
+                  {isAdmin && (
+                    <TableCell className="whitespace-nowrap">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        disabled={busyTid === r.tid}
+                        onClick={() => handleDelete(r.tid)}
+                      >
+                        Löschen
+                      </Button>
+                      {rowError?.tid === r.tid && (
+                        <p className="mt-1 text-sm text-destructive">
+                          {rowError.message}
+                        </p>
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
               {filtered.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={isAdmin ? 7 : 6}
                     className="py-6 text-center text-muted-foreground"
                   >
                     Keine Einträge gefunden.

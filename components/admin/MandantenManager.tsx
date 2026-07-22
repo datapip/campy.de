@@ -3,10 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  createSite,
-  deleteSite,
-  updateSite,
-  updateSiteVkclkid,
+  createMandant,
+  deleteMandant,
+  updateMandant,
 } from "@/app/actions/admin";
 import { unparseCsv } from "@/lib/csv";
 import { downloadTextFile } from "@/lib/download";
@@ -23,23 +22,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type Site = {
-  siteid: number;
-  name: string;
-  vkclkidTemplate: string | null;
-  createdAt: string;
-};
+type Mandant = { mandantid: number; name: string; createdAt: string };
 
-export function SitesManager({ rows }: { rows: Site[] }) {
+export function MandantenManager({ rows }: { rows: Mandant[] }) {
   const router = useRouter();
   const [newName, setNewName] = useState("");
-  const [newTemplate, setNewTemplate] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
-  const [editTemplate, setEditTemplate] = useState("");
   const [rowError, setRowError] = useState<{ id: number; message: string } | null>(
     null,
   );
@@ -50,49 +42,31 @@ export function SitesManager({ rows }: { rows: Site[] }) {
     setCreateError(null);
     setCreating(true);
     try {
-      const res = await createSite(newName);
+      const res = await createMandant(newName);
       if (!res.ok) {
         setCreateError(res.error);
         return;
       }
-      if (newTemplate.trim()) {
-        const templateRes = await updateSiteVkclkid(res.data.siteid, newTemplate);
-        if (!templateRes.ok) {
-          setCreateError(
-            `Site wurde angelegt, aber vkclkid-Template konnte nicht gespeichert werden: ${templateRes.error}`,
-          );
-          return;
-        }
-      }
       setNewName("");
-      setNewTemplate("");
       router.refresh();
     } finally {
       setCreating(false);
     }
   }
 
-  function startEdit(row: Site) {
-    setEditingId(row.siteid);
+  function startEdit(row: Mandant) {
+    setEditingId(row.mandantid);
     setEditName(row.name);
-    setEditTemplate(row.vkclkidTemplate ?? "");
     setRowError(null);
   }
 
-  async function saveEdit(siteid: number) {
-    setBusyId(siteid);
+  async function saveEdit(mandantid: number) {
+    setBusyId(mandantid);
     setRowError(null);
     try {
-      const [nameRes, templateRes] = await Promise.all([
-        updateSite(siteid, editName),
-        updateSiteVkclkid(siteid, editTemplate),
-      ]);
-      if (!nameRes.ok) {
-        setRowError({ id: siteid, message: nameRes.error });
-        return;
-      }
-      if (!templateRes.ok) {
-        setRowError({ id: siteid, message: templateRes.error });
+      const res = await updateMandant(mandantid, editName);
+      if (!res.ok) {
+        setRowError({ id: mandantid, message: res.error });
         return;
       }
       setEditingId(null);
@@ -102,13 +76,13 @@ export function SitesManager({ rows }: { rows: Site[] }) {
     }
   }
 
-  async function handleDelete(siteid: number) {
-    setBusyId(siteid);
+  async function handleDelete(mandantid: number) {
+    setBusyId(mandantid);
     setRowError(null);
     try {
-      const res = await deleteSite(siteid);
+      const res = await deleteMandant(mandantid);
       if (!res.ok) {
-        setRowError({ id: siteid, message: res.error });
+        setRowError({ id: mandantid, message: res.error });
         return;
       }
       router.refresh();
@@ -119,40 +93,29 @@ export function SitesManager({ rows }: { rows: Site[] }) {
 
   function handleExport() {
     const csv = unparseCsv(
-      ["siteid", "name", "vkclkidTemplate", "createdAt"],
-      rows.map((r) => [r.siteid, r.name, r.vkclkidTemplate ?? "", r.createdAt]),
+      ["mandantid", "name", "createdAt"],
+      rows.map((r) => [r.mandantid, r.name, r.createdAt]),
     );
-    downloadTextFile("sites.csv", csv);
+    downloadTextFile("mandanten.csv", csv);
   }
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Neuer Site</CardTitle>
+          <CardTitle className="text-sm">Neuer Mandant</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
               <Input
-                placeholder="Name (z. B. Google Search)"
+                placeholder="Name (z. B. VKB)"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
               <Button type="submit" disabled={creating}>
                 Hinzufügen
               </Button>
-            </div>
-            <div className="space-y-1.5">
-              <p className="text-sm text-muted-foreground">
-                vkclkid-Template (optional)
-              </p>
-              <Input
-                className="font-mono text-xs"
-                placeholder="z. B. {campaignid}_{adgroupid}_{creative}"
-                value={newTemplate}
-                onChange={(e) => setNewTemplate(e.target.value)}
-              />
             </div>
             {createError && (
               <p className="text-sm text-destructive">{createError}</p>
@@ -163,38 +126,28 @@ export function SitesManager({ rows }: { rows: Site[] }) {
 
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-sm">Sites ({rows.length})</CardTitle>
+          <CardTitle className="text-sm">Mandanten ({rows.length})</CardTitle>
           <Button type="button" variant="outline" onClick={handleExport}>
             Als CSV exportieren
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Manche Plattformen bieten einen eigenen Klick-ID-Parameter an (z. B.
-            Google Ads ValueTrack oder der Facebook-Anzeigenparameter). Ist für einen
-            Site ein vkclkid-Template hinterlegt, wird es als zusätzlicher
-            „vkclkid“-Parameter an das Ende jeder generierten URL angehängt.
-            Platzhalter wie <code className="font-mono">{"{campaignid}"}</code> oder{" "}
-            <code className="font-mono">{"{{ad.id}}"}</code> werden unverändert
-            übernommen — die jeweilige Plattform ersetzt sie beim Klick.
-          </p>
+        <CardContent>
           <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>siteid</TableHead>
+                  <TableHead>mandantid</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>vkclkid-Template</TableHead>
                   <TableHead>Erstellt</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.map((row) => {
-                  const isEditing = editingId === row.siteid;
+                  const isEditing = editingId === row.mandantid;
                   return (
-                    <TableRow key={row.siteid}>
-                      <TableCell>{row.siteid}</TableCell>
+                    <TableRow key={row.mandantid}>
+                      <TableCell>{row.mandantid}</TableCell>
                       <TableCell>
                         {isEditing ? (
                           <Input
@@ -205,18 +158,6 @@ export function SitesManager({ rows }: { rows: Site[] }) {
                           row.name
                         )}
                       </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {isEditing ? (
-                          <Input
-                            className="font-mono text-xs"
-                            value={editTemplate}
-                            onChange={(e) => setEditTemplate(e.target.value)}
-                            placeholder="z. B. {campaignid}_{adgroupid}_{creative}"
-                          />
-                        ) : (
-                          row.vkclkidTemplate || "–"
-                        )}
-                      </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {formatDateTime(row.createdAt)}
                       </TableCell>
@@ -225,8 +166,8 @@ export function SitesManager({ rows }: { rows: Site[] }) {
                           <div className="flex gap-2">
                             <Button
                               type="button"
-                              disabled={busyId === row.siteid}
-                              onClick={() => saveEdit(row.siteid)}
+                              disabled={busyId === row.mandantid}
+                              onClick={() => saveEdit(row.mandantid)}
                             >
                               Speichern
                             </Button>
@@ -250,14 +191,14 @@ export function SitesManager({ rows }: { rows: Site[] }) {
                             <Button
                               type="button"
                               variant="destructive"
-                              disabled={busyId === row.siteid}
-                              onClick={() => handleDelete(row.siteid)}
+                              disabled={busyId === row.mandantid}
+                              onClick={() => handleDelete(row.mandantid)}
                             >
                               Löschen
                             </Button>
                           </div>
                         )}
-                        {rowError?.id === row.siteid && (
+                        {rowError?.id === row.mandantid && (
                           <p className="mt-1 text-sm text-destructive">
                             {rowError.message}
                           </p>
@@ -269,10 +210,10 @@ export function SitesManager({ rows }: { rows: Site[] }) {
                 {rows.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={4}
                       className="py-6 text-center text-muted-foreground"
                     >
-                      Keine Sites vorhanden.
+                      Keine Mandanten vorhanden.
                     </TableCell>
                   </TableRow>
                 )}

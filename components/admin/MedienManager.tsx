@@ -2,12 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createMedium, deleteMedium, updateMedium } from "@/app/actions/admin";
+import {
+  createMedium,
+  deleteMedium,
+  setMediumSites,
+  updateMedium,
+} from "@/app/actions/admin";
 import { unparseCsv } from "@/lib/csv";
 import { downloadTextFile } from "@/lib/download";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatSite } from "@/lib/format";
+import type { MediumSiteMap } from "@/lib/site-mediums";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -19,19 +26,36 @@ import {
 } from "@/components/ui/table";
 
 type Medium = { meid: number; name: string; createdAt: string };
+type Site = { siteid: number; name: string };
 
-export function MedienManager({ rows }: { rows: Medium[] }) {
+export function MedienManager({
+  rows,
+  sites,
+  mediumSiteMap,
+}: {
+  rows: Medium[];
+  sites: Site[];
+  mediumSiteMap: MediumSiteMap;
+}) {
   const router = useRouter();
   const [newName, setNewName] = useState("");
+  const [newSiteIds, setNewSiteIds] = useState<number[]>([]);
   const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
+  const [editSiteIds, setEditSiteIds] = useState<number[]>([]);
   const [rowError, setRowError] = useState<{ id: number; message: string } | null>(
     null,
   );
   const [busyId, setBusyId] = useState<number | null>(null);
+
+  function toggleNewSite(siteid: number, checked: boolean) {
+    setNewSiteIds((prev) =>
+      checked ? [...prev, siteid] : prev.filter((id) => id !== siteid),
+    );
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -43,7 +67,17 @@ export function MedienManager({ rows }: { rows: Medium[] }) {
         setCreateError(res.error);
         return;
       }
+      if (newSiteIds.length > 0) {
+        const sitesRes = await setMediumSites(res.data.meid, newSiteIds);
+        if (!sitesRes.ok) {
+          setCreateError(
+            `Medium wurde angelegt, aber Sites konnten nicht zugeordnet werden: ${sitesRes.error}`,
+          );
+          return;
+        }
+      }
       setNewName("");
+      setNewSiteIds([]);
       router.refresh();
     } finally {
       setCreating(false);
@@ -53,16 +87,30 @@ export function MedienManager({ rows }: { rows: Medium[] }) {
   function startEdit(row: Medium) {
     setEditingId(row.meid);
     setEditName(row.name);
+    setEditSiteIds(mediumSiteMap[row.meid] ?? []);
     setRowError(null);
+  }
+
+  function toggleEditSite(siteid: number, checked: boolean) {
+    setEditSiteIds((prev) =>
+      checked ? [...prev, siteid] : prev.filter((id) => id !== siteid),
+    );
   }
 
   async function saveEdit(meid: number) {
     setBusyId(meid);
     setRowError(null);
     try {
-      const res = await updateMedium(meid, editName);
-      if (!res.ok) {
-        setRowError({ id: meid, message: res.error });
+      const [nameRes, sitesRes] = await Promise.all([
+        updateMedium(meid, editName),
+        setMediumSites(meid, editSiteIds),
+      ]);
+      if (!nameRes.ok) {
+        setRowError({ id: meid, message: nameRes.error });
+        return;
+      }
+      if (!sitesRes.ok) {
+        setRowError({ id: meid, message: sitesRes.error });
         return;
       }
       setEditingId(null);
@@ -113,6 +161,29 @@ export function MedienManager({ rows }: { rows: Medium[] }) {
                 Hinzufügen
               </Button>
             </div>
+            <div className="space-y-1.5">
+              <p className="text-sm text-muted-foreground">
+                Zugeordnete Sites (optional — leer lassen für &quot;Alle Sites&quot;)
+              </p>
+              <div className="max-h-48 space-y-1.5 overflow-y-auto rounded-md border p-2">
+                {sites.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Keine Sites vorhanden.
+                  </p>
+                )}
+                {sites.map((s) => (
+                  <label key={s.siteid} className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={newSiteIds.includes(s.siteid)}
+                      onCheckedChange={(checked) =>
+                        toggleNewSite(s.siteid, checked === true)
+                      }
+                    />
+                    {formatSite(s)}
+                  </label>
+                ))}
+              </div>
+            </div>
             {createError && (
               <p className="text-sm text-destructive">{createError}</p>
             )}
@@ -134,6 +205,7 @@ export function MedienManager({ rows }: { rows: Medium[] }) {
                 <TableRow>
                   <TableHead>meid</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Zugeordnete Sites</TableHead>
                   <TableHead>Erstellt</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -141,6 +213,7 @@ export function MedienManager({ rows }: { rows: Medium[] }) {
               <TableBody>
                 {rows.map((row) => {
                   const isEditing = editingId === row.meid;
+                  const assignedSiteIds = mediumSiteMap[row.meid] ?? [];
                   return (
                     <TableRow key={row.meid}>
                       <TableCell>{row.meid}</TableCell>
@@ -152,6 +225,42 @@ export function MedienManager({ rows }: { rows: Medium[] }) {
                           />
                         ) : (
                           row.name
+                        )}
+                      </TableCell>
+                      <TableCell className="min-w-[14rem]">
+                        {isEditing ? (
+                          <div className="max-h-48 space-y-1.5 overflow-y-auto rounded-md border p-2">
+                            {sites.length === 0 && (
+                              <p className="text-sm text-muted-foreground">
+                                Keine Sites vorhanden.
+                              </p>
+                            )}
+                            {sites.map((s) => (
+                              <label
+                                key={s.siteid}
+                                className="flex items-center gap-2 text-sm"
+                              >
+                                <Checkbox
+                                  checked={editSiteIds.includes(s.siteid)}
+                                  onCheckedChange={(checked) =>
+                                    toggleEditSite(s.siteid, checked === true)
+                                  }
+                                />
+                                {formatSite(s)}
+                              </label>
+                            ))}
+                          </div>
+                        ) : assignedSiteIds.length === 0 ? (
+                          <span className="text-sm text-muted-foreground">
+                            Alle Sites
+                          </span>
+                        ) : (
+                          <span className="text-sm">
+                            {sites
+                              .filter((s) => assignedSiteIds.includes(s.siteid))
+                              .map((s) => formatSite(s))
+                              .join(", ")}
+                          </span>
                         )}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
@@ -206,7 +315,7 @@ export function MedienManager({ rows }: { rows: Medium[] }) {
                 {rows.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={4}
+                      colSpan={5}
                       className="py-6 text-center text-muted-foreground"
                     >
                       Keine Medien vorhanden.

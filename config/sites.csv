@@ -1,0 +1,62 @@
+﻿siteid;name;vkclkidTemplate
+101;newsletter;
+102;systemmail;
+103;google display;{campaignid}_{adgroupid}_{creative}
+104;google ads;{campaignid}_{adgroupid}_{creative}
+105;facebook;{{ad.id}}
+106;instagram;{{ad.id}}
+107;pinterest;{adid}
+108;linkedin;{{creative_id}}
+109;youtube;{campaignid}_{adgroupid}_{creative}
+110;x;
+111;tiktok;_cid_
+112;taboola;{campaign_item_id}
+113;outbrain;{{ad_id}}
+114;mailing;
+115;flyer;
+116;produktgruppenprospekt;
+117;rechnungsbeileger;
+118;tarifdetailsblatt;
+119;ansprachehilfe-klassisch;
+120;ansprachehilfe-digital;
+121;poster-a1;
+122;digitales-poster;
+123;kad-gaa;
+124;thekenaufsteller-a4;
+125;anzeige;
+126;vertriebsleitfaden;
+127;telefonleitfaden;
+128;gespraechsleitfaden;
+129;ausstellungsstand;
+130;e-mail-vorlage;
+131;mgm;
+132;vkb;
+133;ukv;
+134;urv;
+135;sav;
+136;antenne bayern;
+137;radio energy;
+138;if;
+139;emma;
+140;wb;
+141;microsoft ads;
+142;meta;{{ad.id}}
+143;inbox ad;
+144;pos-boden;
+145;keleya app;
+146;aokno;
+147;aoknw;
+148;mama app;
+149;ammely hebammenplattform;
+150;aoksan;
+151;ad alliance;
+152;seven one;
+153;s71;
+154;pappaufsteller;
+155;cvd extern;
+156;etermio;
+157;bkk verbundplus;
+158;fbb;
+159;asscompact;
+160;stellenanzeigen;
+161;vermarkter;

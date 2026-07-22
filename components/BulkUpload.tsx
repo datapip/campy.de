@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   bulkGenerate,
   bulkValidate,
@@ -10,6 +10,7 @@ import {
 import { buildBulkUploadTemplate, unparseCsv } from "@/lib/csv";
 import { downloadTextFile } from "@/lib/download";
 import { formatCampaign, formatMedium, formatSite } from "@/lib/format";
+import { filterMediumsForSite, type MediumSiteMap } from "@/lib/site-mediums";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,12 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-type Campaign = { campid: number; name: string; date: string };
+type Campaign = {
+  campid: number;
+  name: string;
+  date: string;
+  mandantName: string | null;
+};
 type Site = { siteid: number; name: string };
 type Medium = { meid: number; name: string };
 
@@ -38,14 +44,22 @@ export function BulkUpload({
   campaigns,
   sites,
   mediums,
+  mediumSiteMap,
 }: {
   campaigns: Campaign[];
   sites: Site[];
   mediums: Medium[];
+  mediumSiteMap: MediumSiteMap;
 }) {
   const [campid, setCampid] = useState("");
   const [siteid, setSiteid] = useState("");
   const [meid, setMeid] = useState("");
+
+  const allowedMediums = useMemo(
+    () =>
+      siteid ? filterMediumsForSite(mediums, mediumSiteMap, Number(siteid)) : mediums,
+    [siteid, mediums, mediumSiteMap],
+  );
   const [fileName, setFileName] = useState<string | null>(null);
   const [preview, setPreview] = useState<BulkPreviewRow[] | null>(null);
   const [results, setResults] = useState<BulkGenerateResultRow[] | null>(null);
@@ -152,7 +166,18 @@ export function BulkUpload({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="bulk-siteid">Site (Standard)</Label>
-              <Select value={siteid} onValueChange={setSiteid}>
+              <Select
+                value={siteid}
+                onValueChange={(value) => {
+                  setSiteid(value);
+                  const stillAllowed = filterMediumsForSite(
+                    mediums,
+                    mediumSiteMap,
+                    Number(value),
+                  ).some((m) => String(m.meid) === meid);
+                  if (!stillAllowed) setMeid("");
+                }}
+              >
                 <SelectTrigger id="bulk-siteid" className="w-full">
                   <SelectValue placeholder="(aus Datei)" />
                 </SelectTrigger>
@@ -172,7 +197,7 @@ export function BulkUpload({
                   <SelectValue placeholder="(aus Datei)" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mediums.map((m) => (
+                  {allowedMediums.map((m) => (
                     <SelectItem key={m.meid} value={String(m.meid)}>
                       {formatMedium(m)}
                     </SelectItem>

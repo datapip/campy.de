@@ -14,6 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -26,19 +33,32 @@ type Campaign = {
   campid: number;
   name: string;
   date: string;
+  mandantid: number | null;
+  mandantName: string | null;
   createdAt: string;
 };
+type Mandant = { mandantid: number; name: string };
 
-export function KampagnenManager({ rows }: { rows: Campaign[] }) {
+export function KampagnenManager({
+  rows,
+  mandanten,
+}: {
+  rows: Campaign[];
+  mandanten: Mandant[];
+}) {
   const router = useRouter();
   const [newName, setNewName] = useState("");
   const [newDate, setNewDate] = useState("");
+  const [newMandantId, setNewMandantId] = useState(
+    String(mandanten[0]?.mandantid ?? ""),
+  );
   const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [editDate, setEditDate] = useState("");
+  const [editMandantId, setEditMandantId] = useState("");
   const [rowError, setRowError] = useState<{ id: number; message: string } | null>(
     null,
   );
@@ -49,7 +69,7 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
     setCreateError(null);
     setCreating(true);
     try {
-      const res = await createCampaign(newName, newDate);
+      const res = await createCampaign(newName, newDate, Number(newMandantId));
       if (!res.ok) {
         setCreateError(res.error);
         return;
@@ -66,6 +86,7 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
     setEditingId(row.campid);
     setEditName(row.name);
     setEditDate(row.date);
+    setEditMandantId(String(row.mandantid ?? ""));
     setRowError(null);
   }
 
@@ -73,7 +94,12 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
     setBusyId(campid);
     setRowError(null);
     try {
-      const res = await updateCampaign(campid, editName, editDate);
+      const res = await updateCampaign(
+        campid,
+        editName,
+        editDate,
+        Number(editMandantId),
+      );
       if (!res.ok) {
         setRowError({ id: campid, message: res.error });
         return;
@@ -102,8 +128,8 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
 
   function handleExport() {
     const csv = unparseCsv(
-      ["campid", "name", "date", "createdAt"],
-      rows.map((r) => [r.campid, r.name, r.date, r.createdAt]),
+      ["campid", "mandant", "name", "date", "createdAt"],
+      rows.map((r) => [r.campid, r.mandantName ?? "", r.name, r.date, r.createdAt]),
     );
     downloadTextFile("kampagnen.csv", csv);
   }
@@ -116,7 +142,19 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-[1fr_160px_auto]">
+            <div className="grid gap-3 sm:grid-cols-[160px_1fr_160px_auto]">
+              <Select value={newMandantId} onValueChange={setNewMandantId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Mandant" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mandanten.map((m) => (
+                    <SelectItem key={m.mandantid} value={String(m.mandantid)}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 placeholder="Name (z. B. PHV Sommer)"
                 value={newName}
@@ -151,6 +189,7 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>campid</TableHead>
+                  <TableHead>Mandant</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Datum</TableHead>
                   <TableHead>Erstellt</TableHead>
@@ -163,6 +202,24 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
                   return (
                     <TableRow key={row.campid}>
                       <TableCell>{row.campid}</TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <Select value={editMandantId} onValueChange={setEditMandantId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Mandant" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {mandanten.map((m) => (
+                                <SelectItem key={m.mandantid} value={String(m.mandantid)}>
+                                  {m.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          row.mandantName ?? "–"
+                        )}
+                      </TableCell>
                       <TableCell>
                         {isEditing ? (
                           <Input
@@ -235,7 +292,7 @@ export function KampagnenManager({ rows }: { rows: Campaign[] }) {
                 {rows.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={6}
                       className="py-6 text-center text-muted-foreground"
                     >
                       Keine Kampagnen vorhanden.

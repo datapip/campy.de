@@ -1,0 +1,9 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]: Ziel-URL Generator
+    - generic [ref=e6]: Bitte Passwort eingeben, um fortzufahren.
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - text: Passwort
+      - textbox "Passwort" [active] [ref=e10]
+    - button "Anmelden" [disabled]

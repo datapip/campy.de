@@ -1,9 +1,23 @@
-export type CampaignLike = { campid: number; name: string; date: string };
+export type CampaignLike = {
+  campid: number;
+  name: string;
+  date: string;
+  mandantName: string | null;
+};
 export type SiteLike = { siteid: number; name: string };
 export type MediumLike = { meid: number; name: string };
 
+/** Converts the app's "MM.YYYY" campaign date to the "MM/YYYY" display form. */
+export function formatCampaignPeriod(date: string): string {
+  return date.replace(".", "/");
+}
+
 export function formatCampaign(c: CampaignLike): string {
-  return `${c.campid} / ${c.name} - ${c.date}`;
+  const period = formatCampaignPeriod(c.date);
+  // mandantName is null for legacy campaigns saved before Mandant existed.
+  return c.mandantName
+    ? `${c.campid} / ${c.mandantName} - ${c.name} - ${period}`
+    : `${c.campid} / ${c.name} - ${period}`;
 }
 
 export function formatSite(s: SiteLike): string {

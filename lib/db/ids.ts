@@ -1,6 +1,14 @@
 import { eq, max } from "drizzle-orm";
 import { db } from "./client";
-import { campaigns, mediums, settings, sites, tids, TID_START_KEY } from "./schema";
+import {
+  campaigns,
+  mandanten,
+  mediums,
+  settings,
+  sites,
+  tids,
+  TID_START_KEY,
+} from "./schema";
 
 /**
  * All ID assignments run max(existing)+1 and the insert inside a single
@@ -89,11 +97,24 @@ export function insertTidsBulk(
   });
 }
 
-export function insertCampaignWithNextId(name: string, date: string): number {
+export function insertCampaignWithNextId(
+  name: string,
+  date: string,
+  mandantid: number,
+): number {
   return db.transaction((tx) => {
     const row = tx.select({ max: max(campaigns.campid) }).from(campaigns).get();
     const next = (row?.max ?? 0) + 1;
-    tx.insert(campaigns).values({ campid: next, name, date }).run();
+    tx.insert(campaigns).values({ campid: next, name, date, mandantid }).run();
+    return next;
+  });
+}
+
+export function insertMandantWithNextId(name: string): number {
+  return db.transaction((tx) => {
+    const row = tx.select({ max: max(mandanten.mandantid) }).from(mandanten).get();
+    const next = (row?.max ?? 0) + 1;
+    tx.insert(mandanten).values({ mandantid: next, name }).run();
     return next;
   });
 }

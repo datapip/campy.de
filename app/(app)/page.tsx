@@ -4,6 +4,7 @@ import { VerlaufTable } from "@/components/VerlaufTable";
 import {
   getCampaigns,
   getMediums,
+  getMediumSiteMap,
   getSites,
   getTidsWithRelations,
 } from "@/lib/db/queries";
@@ -15,6 +16,7 @@ export default async function GeneratorPage() {
   const campaigns = getCampaigns();
   const sites = getSites();
   const mediums = getMediums();
+  const mediumSiteMap = getMediumSiteMap();
   const rows = getTidsWithRelations();
   const roleCookie = (await cookies()).get(SESSION_COOKIE)?.value;
   const isAdmin = isRole(roleCookie) && roleCookie === "admin";
@@ -28,7 +30,12 @@ export default async function GeneratorPage() {
             Erstellt Kampagnen-Tracking-URLs mit automatisch vergebener Tracking-ID.
           </p>
         </div>
-        <GeneratorTabs campaigns={campaigns} sites={sites} mediums={mediums} />
+        <GeneratorTabs
+          campaigns={campaigns}
+          sites={sites}
+          mediums={mediums}
+          mediumSiteMap={mediumSiteMap}
+        />
       </div>
 
       <div className="space-y-6">

@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/admin/kampagnen", label: "Kampagnen" },
+  { href: "/admin/mandanten", label: "Mandanten" },
   { href: "/admin/sites", label: "Sites" },
   { href: "/admin/medien", label: "Medien" },
-  { href: "/admin/klickids", label: "Klick-IDs" },
 ];
 
 export function AdminNav() {

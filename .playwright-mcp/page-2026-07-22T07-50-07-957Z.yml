@@ -1,0 +1,122 @@
+- generic [active] [ref=f5e1]:
+  - button "Open Next.js Dev Tools" [ref=f5e154] [cursor=pointer]
+  - alert [ref=f5e158]: Ziel-URL Generator
+  - banner [ref=f5e168]:
+    - generic [ref=f5e169]:
+      - generic [ref=f5e170]: Ziel-URL Generator
+      - navigation [ref=f5e171]:
+        - link "Generator" [ref=f5e172] [cursor=pointer]:
+          - /url: /
+      - button "Abmelden" [ref=f5e174] [cursor=pointer]
+  - main [ref=f5e175]:
+    - generic [ref=f5e176]:
+      - generic [ref=f5e177]:
+        - generic [ref=f5e178]:
+          - heading "Ziel-URL Generator" [level=1] [ref=f5e179]
+          - paragraph [ref=f5e180]: Erstellt Kampagnen-Tracking-URLs mit automatisch vergebener Tracking-ID.
+        - generic [ref=f5e181]:
+          - tablist [ref=f5e182]:
+            - tab "Einzeln generieren" [selected] [ref=f5e183] [cursor=pointer]
+            - tab "Bulk-Upload" [ref=f5e184] [cursor=pointer]
+          - tabpanel "Einzeln generieren" [ref=f5e185]:
+            - generic [ref=f5e189]:
+              - generic [ref=f5e190]:
+                - generic [ref=f5e191]:
+                  - text: Kampagne
+                  - combobox "Kampagne" [ref=f5e192] [cursor=pointer]:
+                    - generic: 1281 / fbb - Kfz - 07/2026
+                  - combobox [ref=f5e195]
+                - generic [ref=f5e196]:
+                  - text: Site
+                  - combobox "Site" [ref=f5e197] [cursor=pointer]:
+                    - generic: 161 / vermarkter
+                  - combobox [ref=f5e200]
+                - generic [ref=f5e201]:
+                  - text: Medium
+                  - combobox "Medium" [ref=f5e202] [cursor=pointer]:
+                    - generic: 31 / video
+                  - combobox [ref=f5e205]
+              - generic [ref=f5e206]:
+                - text: Notiz zur Tracking-ID (optional)
+                - textbox "Notiz zur Tracking-ID (optional)" [ref=f5e207]:
+                  - /placeholder: z. B. Motiv spielende Kinder
+              - generic [ref=f5e208]:
+                - text: Ziel-URL
+                - textbox "Ziel-URL" [ref=f5e209]:
+                  - /placeholder: https://www.example.de/lp/seite.html
+              - button "URL generieren" [ref=f5e211] [cursor=pointer]
+      - generic [ref=f5e212]:
+        - generic [ref=f5e213]:
+          - heading "Verlauf" [level=2] [ref=f5e214]
+          - paragraph [ref=f5e215]: Alle bisher generierten Tracking-URLs, neueste zuerst.
+        - generic [ref=f5e216]:
+          - generic [ref=f5e217]:
+            - textbox "Suche nach tid, Notiz oder URL…" [ref=f5e218]
+            - generic [ref=f5e219]:
+              - generic [ref=f5e220]:
+                - generic [ref=f5e221]: Von
+                - textbox "Von" [ref=f5e222]
+              - generic [ref=f5e223]:
+                - generic [ref=f5e224]: Bis
+                - textbox "Bis" [ref=f5e225]
+              - button "Als CSV exportieren" [ref=f5e226] [cursor=pointer]
+          - table [ref=f5e230]:
+            - rowgroup [ref=f5e231]:
+              - row [ref=f5e232]:
+                - columnheader "Tracking-ID" [ref=f5e233]
+                - columnheader "Kampagnen-ID" [ref=f5e234]
+                - columnheader "Site-ID" [ref=f5e235]
+                - columnheader "Medium-ID" [ref=f5e236]
+                - columnheader "Generierte URL" [ref=f5e237]
+                - columnheader "Erstellt" [ref=f5e238]
+            - rowgroup [ref=f5e239]:
+              - row [ref=f5e240]:
+                - cell "12952" [ref=f5e241]
+                - cell "1281 / fbb - Kfz - 07/2026" [ref=f5e242]
+                - cell "161 / vermarkter" [ref=f5e243]
+                - cell "31 / video" [ref=f5e244]
+                - cell "https://this-domain-should-not-exist-campytest.invalid/?tid=12952&campid=1281&siteid=161&meid=31 Kopieren QR-Code" [ref=f5e245]:
+                  - generic [ref=f5e246]:
+                    - generic [ref=f5e247]: https://this-domain-should-not-exist-campytest.invalid/?tid=12952&campid=1281&siteid=161&meid=31
+                    - button "Kopieren" [ref=f5e248] [cursor=pointer]
+                    - button "QR-Code" [ref=f5e249] [cursor=pointer]
+                - cell "22.07.2026, 09:35" [ref=f5e250]
+              - row [ref=f5e251]:
+                - cell "12951" [ref=f5e252]
+                - cell "1281 / fbb - Kfz - 07/2026" [ref=f5e253]
+                - cell "161 / vermarkter" [ref=f5e254]
+                - cell "31 / video" [ref=f5e255]
+                - cell "https://www.doesnotexistasdasd.as/?tid=12951&campid=1281&siteid=161&meid=31 Kopieren QR-Code" [ref=f5e256]:
+                  - generic [ref=f5e257]:
+                    - generic [ref=f5e258]: https://www.doesnotexistasdasd.as/?tid=12951&campid=1281&siteid=161&meid=31
+                    - button "Kopieren" [ref=f5e259] [cursor=pointer]
+                    - button "QR-Code" [ref=f5e260] [cursor=pointer]
+                - cell "22.07.2026, 09:30" [ref=f5e261]
+              - row [ref=f5e262]:
+                - cell "12950" [ref=f5e263]
+                - cell "1281 / fbb - Kfz - 07/2026" [ref=f5e264]
+                - cell "161 / vermarkter" [ref=f5e265]
+                - cell "31 / video" [ref=f5e266]
+                - cell "https://www.google.com/this-page-does-not-exist-xyz?tid=12950&campid=1281&siteid=161&meid=31 Kopieren QR-Code" [ref=f5e267]:
+                  - generic [ref=f5e268]:
+                    - generic [ref=f5e269]: https://www.google.com/this-page-does-not-exist-xyz?tid=12950&campid=1281&siteid=161&meid=31
+                    - button "Kopieren" [ref=f5e270] [cursor=pointer]
+                    - button "QR-Code" [ref=f5e271] [cursor=pointer]
+                - cell "22.07.2026, 09:29" [ref=f5e272]
+              - row [ref=f5e273]:
+                - cell "12949" [ref=f5e274]
+                - cell "1281 / fbb - Kfz - 07/2026" [ref=f5e275]
+                - cell "161 / vermarkter" [ref=f5e276]
+                - cell "31 / video" [ref=f5e277]
+                - cell "https://www.google.com/?tid=12949&campid=1281&siteid=161&meid=31 Kopieren QR-Code" [ref=f5e278]:
+                  - generic [ref=f5e279]:
+                    - generic [ref=f5e280]: https://www.google.com/?tid=12949&campid=1281&siteid=161&meid=31
+                    - button "Kopieren" [ref=f5e281] [cursor=pointer]
+                    - button "QR-Code" [ref=f5e282] [cursor=pointer]
+                - cell "22.07.2026, 09:29" [ref=f5e283]
+          - generic [ref=f5e284]:
+            - paragraph [ref=f5e285]: 1–4 von 4 Einträgen
+            - generic [ref=f5e286]:
+              - button "Zurück" [disabled]
+              - generic [ref=f5e287]: Seite 1 von 1
+              - button "Weiter" [disabled]
