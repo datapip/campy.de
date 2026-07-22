@@ -4,34 +4,34 @@ import { unparseCsv } from "./csv";
 import { db } from "./db/client";
 import { campaigns, mandanten, mediums, siteMediums, sites, tids } from "./db/schema";
 
-const CONFIG_DIR = path.join(process.cwd(), "config");
+const BACKUP_DIR = path.join(process.cwd(), "data", "export");
 
 function writeCsv(
   filename: string,
   fields: string[],
   rows: (string | number | null | undefined)[][],
 ): void {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true });
+  if (!fs.existsSync(BACKUP_DIR)) {
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
   }
-  fs.writeFileSync(path.join(CONFIG_DIR, filename), unparseCsv(fields, rows), "utf-8");
+  fs.writeFileSync(path.join(BACKUP_DIR, filename), unparseCsv(fields, rows), "utf-8");
 }
 
 /**
- * Re-exports current master data to config/*.csv so the folder always
- * mirrors live state — semicolon-separated with a UTF-8 BOM, same as every
- * other export in this app, so it opens directly in (German) Excel for
- * manual review/editing. SQLite stays the source of truth for every read
- * and write in the app (see the transactional ID-assignment invariant in
- * lib/db/ids.ts); this is a generated snapshot that also doubles as the
- * initial seed source on first boot (lib/db/init.ts). Called after every
- * admin mutation, tid generation (single + bulk), and tid deletion —
- * best-effort, a write failure here must never fail the caller's DB
- * mutation. `tids.csv` is the one exception to the seed-source rule: it's
- * written for audit/review only and is never read back by lib/db/init.ts —
- * a fresh DB always starts with zero generated tracking-IDs.
+ * Re-exports current master data to data/export/*.csv — a live backup that
+ * always mirrors current DB state, semicolon-separated with a UTF-8 BOM
+ * like every other export in this app, so it opens directly in (German)
+ * Excel. This directory sits alongside data/app.db (same gitignored,
+ * persisted volume) and is never git-tracked or read back by the app —
+ * it's an inspection/disaster-recovery artifact only. SQLite stays the
+ * sole source of truth for every read and write (see the transactional
+ * ID-assignment invariant in lib/db/ids.ts). config/*.csv is a separate,
+ * git-tracked, developer-authored seed for fresh installs (lib/db/init.ts)
+ * and is never written by the running app. Called after every admin
+ * mutation, tid generation (single + bulk), and tid deletion — best-effort,
+ * a write failure here must never fail the caller's DB mutation.
  */
-export function syncConfigSnapshot(): void {
+export function writeBackupSnapshot(): void {
   try {
     const mandantRows = db
       .select({ mandantid: mandanten.mandantid, name: mandanten.name })

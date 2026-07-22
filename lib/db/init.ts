@@ -59,11 +59,13 @@ CREATE TABLE IF NOT EXISTS settings (
 `;
 
 /**
- * Reads a seed file from config/ (the Excel-friendly snapshot kept in sync
- * by lib/config-sync.ts). Returns null if the file is missing/empty/invalid
- * so callers can fall back to hardcoded defaults — this is only consulted
- * while seeding an empty table, never during normal reads. Every field
- * comes back as a string (raw CSV); callers parse numbers/lists themselves.
+ * Reads a seed file from config/ — a static, git-tracked, developer-authored
+ * set of defaults for a fresh install (never written by the running app; the
+ * live backup mirror lives in data/export/, see lib/backup-sync.ts). Returns
+ * null if the file is missing/empty/invalid so callers can fall back to
+ * hardcoded defaults — this is only consulted while seeding an empty table,
+ * never during normal reads. Every field comes back as a string (raw CSV);
+ * callers parse numbers/lists themselves.
  */
 function readConfigSeedRows(filename: string): Record<string, string>[] | null {
   try {

@@ -1,5 +1,0 @@
-﻿tid;note;campid;siteid;meid;baseUrl;generatedUrl;createdAt
-12949;;1281;161;31;https://www.google.com/;https://www.google.com/?tid=12949&campid=1281&siteid=161&meid=31;2026-07-22 07:29:08
-12950;;1281;161;31;https://www.google.com/this-page-does-not-exist-xyz;https://www.google.com/this-page-does-not-exist-xyz?tid=12950&campid=1281&siteid=161&meid=31;2026-07-22 07:29:26
-12951;;1281;161;31;https://www.doesnotexistasdasd.as/;https://www.doesnotexistasdasd.as/?tid=12951&campid=1281&siteid=161&meid=31;2026-07-22 07:30:40
-12952;;1281;161;31;https://this-domain-should-not-exist-campytest.invalid/;https://this-domain-should-not-exist-campytest.invalid/?tid=12952&campid=1281&siteid=161&meid=31;2026-07-22 07:35:25

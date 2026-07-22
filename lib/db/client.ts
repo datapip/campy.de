@@ -17,6 +17,7 @@ function createConnection(): Database.Database {
   }
   const sqlite = new Database(path.join(dataDir, "app.db"));
   sqlite.pragma("journal_mode = WAL");
+  sqlite.pragma("busy_timeout = 5000");
   ensureSchemaAndSeed(sqlite);
   return sqlite;
 }

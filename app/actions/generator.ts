@@ -8,7 +8,7 @@ import {
   getSiteById,
 } from "@/lib/db/queries";
 import { insertTidWithNextId } from "@/lib/db/ids";
-import { syncConfigSnapshot } from "@/lib/config-sync";
+import { writeBackupSnapshot } from "@/lib/backup-sync";
 import { checkUrlStatus, type UrlCheckResult } from "@/lib/http-check";
 import { isMediumAllowedForSite } from "@/lib/site-mediums";
 import { buildTrackingUrl, validateBaseUrl } from "@/lib/url-builder";
@@ -144,7 +144,7 @@ export async function generateUrl(
       }),
   });
 
-  syncConfigSnapshot();
+  writeBackupSnapshot();
   revalidatePath("/");
   revalidatePath("/admin");
 

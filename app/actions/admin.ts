@@ -29,13 +29,13 @@ import {
   getSiteById,
   getSites,
 } from "@/lib/db/queries";
-import { syncConfigSnapshot } from "@/lib/config-sync";
+import { writeBackupSnapshot } from "@/lib/backup-sync";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { isValidCampaignDate } from "@/lib/format";
 import type { ActionResult } from "./types";
 
 function revalidateAdmin() {
-  syncConfigSnapshot();
+  writeBackupSnapshot();
   revalidatePath("/admin");
   revalidatePath("/");
 }
